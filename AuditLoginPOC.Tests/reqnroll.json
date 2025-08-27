@@ -1,0 +1,16 @@
+{
+  "bindingCulture": {
+    "name": "en-us"
+  },
+  "language": {
+    "feature": "en-us"
+  },
+  "generator": {
+    "allowRowTests": true,
+    "allowDebugGeneratedFiles": true,
+    "generateAsyncTests": true
+  },
+  "runtime": {
+    "missingOrPendingStepsOutcome": "Error"
+  }
+}

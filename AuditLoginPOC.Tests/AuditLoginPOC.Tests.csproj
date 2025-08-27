@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.8.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.1" />
+    <PackageReference Include="Xunit.Categories" Version="2.0.1" />
+    <PackageReference Include="Reqnroll" Version="3.0.0" />
+    <PackageReference Include="Reqnroll.xUnit" Version="3.0.0" />
+    <PackageReference Include="Reqnroll.Tools.MSBuild.Generation" Version="3.0.0" />
+    <PackageReference Include="Shouldly" Version="4.2.1" />
+    <PackageReference Include="Moq" Version="4.20.70" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AuditLoginPOC.Core\AuditLoginPOC.Core.csproj" />
+    <ProjectReference Include="..\AuditLoginPOC.WebApi\AuditLoginPOC.WebApi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Http" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+</Project>
