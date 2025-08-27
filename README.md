@@ -1,91 +1,91 @@
 # HTTP Request Audit Logging POC
 
-Ez a POC projekt bemutatja a HTTP request audit logging különböző megvalósítási lehetőségeit .NET Framework 4.8 Web API alkalmazásokban.
+This POC project demonstrates various implementation approaches for HTTP request audit logging in .NET Framework 4.8 Web API applications.
 
-## Projekt Struktúra
+## Project Structure
 
 ```
 AuditLoginPOC/
-├── AuditLoginPOC.Core/           # Közös interfészek és implementációk
-├── AuditLoginPOC.WebApi/         # Web API alkalmazás
-├── AuditLoginPOC.Tests/          # Reqnroll tesztek
-├── AuditLoginPOC.Benchmarks/     # Teljesítmény benchmarkok
+├── AuditLoginPOC.Core/           # Common interfaces and implementations
+├── AuditLoginPOC.WebApi/         # Web API application
+├── AuditLoginPOC.Tests/          # Reqnroll tests
+├── AuditLoginPOC.Benchmarks/     # Performance benchmarks
 └── README.md
 ```
 
-## Főbb Funkciók
+## Main Features
 
-### 1. Request Body Újraolvasása
-- **ContentReplacementCapturingService**: HttpContent újraolvasása és újraépítése
-- **StreamWrappingCapturingService**: Stream wrapper használatával
-- **PostProcessingCapturingService**: Model binding utáni feldolgozás
+### 1. Request Body Re-reading
+- **ContentReplacementCapturingService**: HttpContent re-reading and rebuilding
+- **StreamWrappingCapturingService**: Using stream wrapper
+- **PostProcessingCapturingService**: Post-model-binding processing
 
-### 2. Eredeti Request Body Loggolása
-- Malformed JSON kezelése
-- Raw request data megőrzése
+### 2. Original Request Body Logging
+- Malformed JSON handling
+- Raw request data preservation
 - Stream state preservation
 
 ### 3. DoS Protection
-- **SizeLimitProtectionService**: Méret alapú védelem
-- **StreamingDigestProtectionService**: Hash alapú védelem
+- **SizeLimitProtectionService**: Size-based protection
+- **StreamingDigestProtectionService**: Hash-based protection
 - **CircuitBreakerProtectionService**: Rate limiting
 
-### 4. FluentValidation Integráció
-- **Person Model**: FirstName, LastName, Email, Age validáció
-- **Extra Field Handling**: A contract-ban nem szereplő mezők (pl. Gender) csendben ignorálódnak
-- **Audit Logging**: Az extra field-ek megmaradnak az audit logban
-- **Dependency Injection**: Validator-ok DI konténeren keresztül injektálódnak
+### 4. FluentValidation Integration
+- **Person Model**: FirstName, LastName, Email, Age validation
+- **Extra Field Handling**: Fields not in the contract (e.g., Gender) are silently ignored
+- **Audit Logging**: Extra fields remain in the audit log
+- **Dependency Injection**: Validators are injected via DI container
 
-### 5. Tesztek
-- Reqnroll acceptance tesztek (XUnit alapú)
-- Unit tesztek kritikus funkciókra (XUnit + Shouldly assertion library)
-- Teljesítmény benchmarkok
+### 5. Tests
+- Reqnroll acceptance tests (XUnit based)
+- Unit tests for critical functionality (XUnit + Shouldly assertion library)
+- Performance benchmarks
 
-## Telepítés és Futtatás
+## Installation and Running
 
-### Előfeltételek
+### Prerequisites
 - .NET Framework 4.8
-- Visual Studio 2019/2022 vagy .NET CLI
+- Visual Studio 2019/2022 or .NET CLI
 
 ### Build
 ```bash
 dotnet build AuditLoginPOC.sln
 ```
 
-### Tesztek Futtatása
+### Running Tests
 ```bash
-# Összes teszt
+# All tests
 dotnet test AuditLoginPOC.Tests/
 
-# Csak Unit tesztek
+# Unit tests only
 dotnet test AuditLoginPOC.Tests/ --filter "Category=UnitTest"
 
-# Csak Acceptance tesztek (Reqnroll)
+# Acceptance tests only (Reqnroll)
 dotnet test AuditLoginPOC.Tests/ --filter "Category=AcceptanceTest"
 ```
 
-### Benchmarkok Futtatása
+### Running Benchmarks
 ```bash
 dotnet run --project AuditLoginPOC.Benchmarks/
 ```
 
-### Web API Futtatása
+### Running Web API
 ```bash
 dotnet run --project AuditLoginPOC.WebApi/
 ```
 
-## API Endpointok
+## API Endpoints
 
 ### Test Endpoints
-- `POST /api/test/echo` - Egyszerű echo endpoint
-- `POST /api/test/malformed` - Malformed JSON teszt
-- `POST /api/test/large` - Nagy request teszt
-- `POST /api/test/validation` - Person validáció teszt (FluentValidation)
-- `POST /api/test/error` - Exception teszt
+- `POST /api/test/echo` - Simple echo endpoint
+- `POST /api/test/malformed` - Malformed JSON test
+- `POST /api/test/large` - Large request test
+- `POST /api/test/validation` - Person validation test (FluentValidation)
+- `POST /api/test/error` - Exception test
 
-## Tesztelési Példák
+## Testing Examples
 
-### 1. Normál JSON Request
+### 1. Normal JSON Request
 ```bash
 curl -X POST http://localhost:5000/api/test/echo \
   -H "Content-Type: application/json" \
@@ -99,16 +99,16 @@ curl -X POST http://localhost:5000/api/test/malformed \
   -d '{ invalid json }'
 ```
 
-### 3. Nagy Request
+### 3. Large Request
 ```bash
 curl -X POST http://localhost:5000/api/test/large \
   -H "Content-Type: application/json" \
   -d '{"data":"'$(printf 'x%.0s' {1..1000000})'"}'
 ```
 
-### 4. Person Validáció (Extra Field Teszt)
+### 4. Person Validation (Extra Field Test)
 ```bash
-# Sikeres validáció extra field-del
+# Successful validation with extra field
 curl -X POST http://localhost:5000/api/test/validation \
   -H "Content-Type: application/json" \
   -d '{
@@ -119,7 +119,7 @@ curl -X POST http://localhost:5000/api/test/validation \
     "Gender": "male"
   }'
 
-# Validáció hiba extra field-del
+# Validation error with extra field
 curl -X POST http://localhost:5000/api/test/validation \
   -H "Content-Type: application/json" \
   -d '{
@@ -131,21 +131,21 @@ curl -X POST http://localhost:5000/api/test/validation \
   }'
 ```
 
-**Megjegyzés**: A `Gender` extra field-et a deszerializáció és validáció csendben ignorálja, de az audit logba bekerül.
+**Note**: The `Gender` extra field is silently ignored by deserialization and validation, but it remains in the audit log.
 
-## Reqnroll Tesztek
+## Reqnroll Tests
 
-A projekt Reqnroll acceptance teszteket tartalmaz a következő területekre:
+The project contains Reqnroll acceptance tests for the following areas:
 
-### Kritikus Követelmények Tesztelése
-- ✅ Request body újraolvasása (deszerializáláskor, validáláskor)
-- ✅ Eredeti request body loggolása
-- ✅ Malformed JSON kezelése
-- ✅ Nagy request kezelése
+### Critical Requirements Testing
+- ✅ Request body re-reading (during deserialization and validation)
+- ✅ Original request body logging
+- ✅ Malformed JSON handling
+- ✅ Large request handling
 - ✅ Validation error capture
 - ✅ Exception handling
 
-### Teszt Scenariók
+### Test Scenarios
 1. **Capture normal JSON request body**
 2. **Capture malformed JSON request body**
 3. **Handle large request with size limit protection**
@@ -154,22 +154,22 @@ A projekt Reqnroll acceptance teszteket tartalmaz a következő területekre:
 6. **Capture request headers and metadata**
 7. **Handle request with JWT authentication**
 
-## Benchmark Eredmények
+## Benchmark Results
 
-A benchmarkok összehasonlítják a különböző audit logging megközelítések teljesítményét:
+The benchmarks compare the performance of different audit logging approaches:
 
-### Mért Metrikák
-- **Mean**: Átlagos végrehajtási idő
-- **Allocated**: Műveletenként lefoglalt memória
-- **Gen0/Gen1/Gen2**: Garbage collection generációk
+### Measured Metrics
+- **Mean**: Average execution time
+- **Allocated**: Memory allocated per operation
+- **Gen0/Gen1/Gen2**: Garbage collection generations
 
-### Összehasonlított Megközelítések
-1. **ContentReplacement** - HttpContent capture és újraépítés
-2. **SizeLimitProtection** - DoS védelem hozzáadása
-3. **PostProcessing** - Minimális capture (nincs raw body)
-4. **FullPipeline** - Teljes audit logging pipeline
+### Compared Approaches
+1. **ContentReplacement** - HttpContent capture and rebuilding
+2. **SizeLimitProtection** - Adding DoS protection
+3. **PostProcessing** - Minimal capture (no raw body)
+4. **FullPipeline** - Complete audit logging pipeline
 
-## Architektúra
+## Architecture
 
 ### Composable Service Architecture
 ```
@@ -177,13 +177,13 @@ A benchmarkok összehasonlítják a különböző audit logging megközelítése
 │   Capturing     │    │   Protection     │    │     Logging     │
 │    Service      │    │    Service       │    │    Service      │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                    ┌─────────────────┐
-                    │   Delegating    │
-                    │    Handler      │
-                    └─────────────────┘
+          │                       │                       │
+          └───────────────────────┼───────────────────────┘
+                                  │
+                     ┌─────────────────┐
+                     │   Delegating    │
+                     │    Handler      │
+                     └─────────────────┘
 ```
 
 ### Service Compatibility Matrix
@@ -194,7 +194,7 @@ A benchmarkok összehasonlítják a különböző audit logging megközelítése
 | StreamWrapping | HTTP Module | ✅ Full | High |
 | PostProcessing | Action Filter | ❌ Processed Only | Low |
 
-## Konfiguráció
+## Configuration
 
 ### Dependency Injection
 ```csharp
@@ -263,111 +263,111 @@ private static void RegisterAuditServices(HttpConfiguration config)
 }
 ```
 
-## Teljesítmény Optimalizációk
+## Performance Optimizations
 
-### Memória Használat
-- **ContentReplacement**: Dupla memória használat a request body feldolgozásakor
-- **StreamWrapping**: Inkrementális memória használat
-- **SizeLimitProtection**: Temp file fallback nagy requestekhez
+### Memory Usage
+- **ContentReplacement**: Double memory usage during request body processing
+- **StreamWrapping**: Incremental memory usage
+- **SizeLimitProtection**: Temp file fallback for large requests
 
 ### Processing Overhead
-- **Early Pipeline**: Minimális hatás a business logic teljesítményére
-- **Stream Manipulation**: CPU overhead változó a stratégiától függően
+- **Early Pipeline**: Minimal impact on business logic performance
+- **Stream Manipulation**: CPU overhead varies by strategy
 
-## Biztonsági Megfontolások
+## Security Considerations
 
 ### Sensitive Data Exposure
-- Raw request logging érzékeny adatokat is rögzíthet
-- JWT token információk óvatos kezelése szükséges
-- Selective field masking vagy encryption javasolt
+- Raw request logging may capture sensitive data
+- JWT token information requires careful handling
+- Selective field masking or encryption recommended
 
 ### DoS Protection
-- Size-based protection nagy requestek ellen
-- Rate limiting client behavior alapján
-- Circuit breaker pattern abuse ellen
+- Size-based protection against large requests
+- Rate limiting based on client behavior
+- Circuit breaker pattern against abuse
 
-## Következő Lépések
+## Next Steps
 
-### Phase 1: Alapvető Implementáció
+### Phase 1: Basic Implementation
 - DelegatingHandler + ContentReplacement + SizeLimit
 
-### Phase 2: Fokozott Biztonság
-- CircuitBreaker pattern hozzáadása
+### Phase 2: Enhanced Security
+- Adding CircuitBreaker pattern
 
-### Phase 3: Skála Optimalizáció
-- BackgroundQueue vagy StreamingDigest implementálása
+### Phase 3: Scale Optimization
+- BackgroundQueue or StreamingDigest implementation
 
-### Phase 4: Enterprise Funkciók
-- Early Capture + Late Log architektúra
+### Phase 4: Enterprise Features
+- Early Capture + Late Log architecture
 
-## Fejlesztői Útmutató
+## Developer Guide
 
-### Új Service Implementálása
-1. Implementálja a megfelelő interfészt
-2. Adja hozzá a service compatibility matrix-hoz
-3. Írjon teszteket a kritikus funkciókra
-4. Benchmark a teljesítmény ellenőrzésére
+### Implementing New Services
+1. Implement the appropriate interface
+2. Add to service compatibility matrix
+3. Write tests for critical functionality
+4. Benchmark for performance verification
 
-### Tesztelési Stratégia
-- **Unit tesztek**: XUnit framework használatával izolált komponensekre (`[UnitTest]` attribútum)
-- **Acceptance tesztek**: Reqnroll + XUnit end-to-end flow validációra (`[AcceptanceTest]` attribútum)
-- **Performance tesztek**: BenchmarkDotNet load alatt
-- **Security tesztek**: Érzékeny adatok kezelésére
+### Testing Strategy
+- **Unit tests**: XUnit framework for isolated components (`[UnitTest]` attribute)
+- **Acceptance tests**: Reqnroll + XUnit for end-to-end flow validation (`[AcceptanceTest]` attribute)
+- **Performance tests**: BenchmarkDotNet under load
+- **Security tests**: Sensitive data handling
 
-### Teszt Kategorizálás
-A projekt XUnit.Categories használatával kategorizálja a teszteket:
-- **UnitTest**: Izolált komponens tesztek (5 teszt)
-- **AcceptanceTest**: End-to-end Reqnroll tesztek (8 teszt)
+### Test Categorization
+The project uses XUnit.Categories to categorize tests:
+- **UnitTest**: Isolated component tests (5 tests)
+- **AcceptanceTest**: End-to-end Reqnroll tests (8 tests)
 
 ### Assertion Library
-A projekt a **Shouldly** assertion library-t használja a FluentAssertions helyett, mivel:
-- **Ingyenes**: A FluentAssertions 8.x verziótól kezdve fizetős
-- **Expresszív**: Hasonlóan olvasható szintaxis
-- **Jó hibaüzenetek**: Részletes hibaüzenetek tesztelés során
+The project uses the **Shouldly** assertion library instead of FluentAssertions because:
+- **Free**: FluentAssertions 8.x and above are no longer free
+- **Expressive**: Similar readable syntax
+- **Good error messages**: Detailed error messages during testing
 
-**Példa Shouldly használatára:**
+**Example of Shouldly usage:**
 ```csharp
-// FluentAssertions helyett
+// Instead of FluentAssertions
 result.Should().NotBeNull();
 result.Should().BeOfType<OkResult>();
 content.Should().Contain("expected text");
 
-// Shouldly használatával
+// Using Shouldly
 result.ShouldNotBeNull();
 result.ShouldBeOfType<OkResult>();
 content.ShouldContain("expected text");
 ```
 
-### Típus Ellenőrzés és Pattern Matching
-A tesztekben **típus ellenőrzést és pattern matching-ot** használunk a reflection helyett:
+### Type Checking and Pattern Matching
+In tests, we use **type checking and pattern matching** instead of reflection:
 
 ```csharp
-// Reflection helyett (kerülendő)
+// Instead of reflection (avoid)
 var contentProperty = result.GetType().GetProperty("Content");
 var content = contentProperty?.GetValue(result);
 
-// Típus ellenőrzés és pattern matching (javasolt)
+// Type checking and pattern matching (recommended)
 if (result is OkNegotiatedContentResult<object> okResult)
 {
-    var content = okResult.Content; // Típusbiztos hozzáférés
+    var content = okResult.Content; // Type-safe access
     content.ShouldNotBeNull();
 }
 ```
 
-**Előnyök:**
-- **Típusbiztonság**: Compile-time ellenőrzés
-- **Teljesítmény**: Nincs reflection overhead
-- **Olvashatóság**: Egyértelmű kód
-- **IDE támogatás**: IntelliSense és refactoring
+**Benefits:**
+- **Type safety**: Compile-time checking
+- **Performance**: No reflection overhead
+- **Readability**: Clear code
+- **IDE support**: IntelliSense and refactoring
 
-## Kapcsolódó Dokumentáció
+## Related Documentation
 
-- [docs/audit_logging_analysis-v4.md](docs/audit_logging_analysis-v4.md) - Részletes technikai elemzés
+- [docs/audit_logging_analysis-v4.md](docs/audit_logging_analysis-v4.md) - Detailed technical analysis
 - [Reqnroll Documentation](https://reqnroll.net/) - Acceptance testing framework
 - [XUnit Documentation](https://xunit.net/) - Unit testing framework
 - [Shouldly Documentation](https://shouldly.io/) - Assertion library
 - [BenchmarkDotNet](https://benchmarkdotnet.org/) - Performance benchmarking
 
-## Licenc
+## License
 
-Ez a projekt MIT licenc alatt áll rendelkezésre.
+This project is licensed under the MIT License.
